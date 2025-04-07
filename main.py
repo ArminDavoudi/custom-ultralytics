@@ -34,13 +34,13 @@ RATIO = None
 AUTO_AUGMENT = "randaugment"
 TORCHVISION_VERSION = metadata.version("torchvision")
 MACOS, LINUX, WINDOWS = (platform.system() == x for x in ["Darwin", "Linux", "Windows"])
-TRAIN_PATH = 'fire_dataset/train'
-VAL_PATH = 'fire_dataset/val'
-TEST_PATH = 'fire_dataset/test'
+TRAIN_PATH = 'datasets/apples/train'
+VAL_PATH = 'datasets/apples/val'
+TEST_PATH = 'datasets/apples/test'
 NUM_WORKERS = 4
 BATCH_SIZE = 16
-NUM_EPOCHS = 150
-LR = 1e-2
+NUM_EPOCHS = 100
+LR = 1e-3
 LR_FACTOR = 0.02
 MODEL_SAVE_PATH = '.'
 
@@ -730,7 +730,7 @@ def train_one_epoch(model, dataloader, criterion, optimizer, device):
 
             # Backward pass
             loss.backward()
-            torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=10.0)  # clip gradients
+            torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=1.0)  # clip gradients
             optimizer.step()
 
             # Metrics
@@ -919,7 +919,7 @@ with mlflow.start_run():
 
         # Save the best model if F1 score improves
         val_f1 = f1_score(val_labels, val_preds, average="weighted")
-        if val_f1 > best_val_f1:
+        if val_f1 >= best_val_f1:
             best_val_f1 = val_f1
             torch.save(model.state_dict(), os.path.join(MODEL_SAVE_PATH, "best.pth"))
             print(f"New best model saved with F1 score: {best_val_f1:.4f}")
